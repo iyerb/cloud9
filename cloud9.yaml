@@ -1,0 +1,180 @@
+Parameters:
+  KeyName:
+    Type: String
+    Default: lab-key-pair 
+Resources:
+  Cloud9VPC9ECB8B29:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/Resource
+  Cloud9VPCPublicSubnet1Subnet83C59F37:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.0.0/17
+      VpcId:
+        Ref: Cloud9VPC9ECB8B29
+      AvailabilityZone: us-east-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Public
+        - Key: aws-cdk:subnet-type
+          Value: Public
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC/PublicSubnet1
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PublicSubnet1/Subnet
+  Cloud9VPCPublicSubnet1RouteTableCB590F88:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Cloud9VPC9ECB8B29
+      Tags:
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC/PublicSubnet1
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PublicSubnet1/RouteTable
+  Cloud9VPCPublicSubnet1RouteTableAssociation0AD6C990:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: Cloud9VPCPublicSubnet1RouteTableCB590F88
+      SubnetId:
+        Ref: Cloud9VPCPublicSubnet1Subnet83C59F37
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PublicSubnet1/RouteTableAssociation
+  Cloud9VPCPublicSubnet1DefaultRoute722FC8B4:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: Cloud9VPCPublicSubnet1RouteTableCB590F88
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: Cloud9VPCIGWB8C7B5EB
+    DependsOn:
+      - Cloud9VPCVPCGW61CE11B8
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PublicSubnet1/DefaultRoute
+  Cloud9VPCPublicSubnet1EIPB0524BA1:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC/PublicSubnet1
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PublicSubnet1/EIP
+  Cloud9VPCPublicSubnet1NATGatewayCB130884:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId:
+        Ref: Cloud9VPCPublicSubnet1Subnet83C59F37
+      AllocationId:
+        Fn::GetAtt:
+          - Cloud9VPCPublicSubnet1EIPB0524BA1
+          - AllocationId
+      Tags:
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC/PublicSubnet1
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PublicSubnet1/NATGateway
+  Cloud9VPCPrivateSubnet1Subnet968DC45A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.128.0/17
+      VpcId:
+        Ref: Cloud9VPC9ECB8B29
+      AvailabilityZone: us-east-1a
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: aws-cdk:subnet-name
+          Value: Private
+        - Key: aws-cdk:subnet-type
+          Value: Private
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC/PrivateSubnet1
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PrivateSubnet1/Subnet
+  Cloud9VPCPrivateSubnet1RouteTableEFBDA2D9:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: Cloud9VPC9ECB8B29
+      Tags:
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC/PrivateSubnet1
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PrivateSubnet1/RouteTable
+  Cloud9VPCPrivateSubnet1RouteTableAssociation013AB4EE:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: Cloud9VPCPrivateSubnet1RouteTableEFBDA2D9
+      SubnetId:
+        Ref: Cloud9VPCPrivateSubnet1Subnet968DC45A
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PrivateSubnet1/RouteTableAssociation
+  Cloud9VPCPrivateSubnet1DefaultRouteE121FA4F:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: Cloud9VPCPrivateSubnet1RouteTableEFBDA2D9
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: Cloud9VPCPublicSubnet1NATGatewayCB130884
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/PrivateSubnet1/DefaultRoute
+  Cloud9VPCIGWB8C7B5EB:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Cloud9Stack/Cloud9VPC
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/IGW
+  Cloud9VPCVPCGW61CE11B8:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId:
+        Ref: Cloud9VPC9ECB8B29
+      InternetGatewayId:
+        Ref: Cloud9VPCIGWB8C7B5EB
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9VPC/VPCGW
+  Cloud9EnvD28F4C4F:
+    Type: AWS::Cloud9::EnvironmentEC2
+    Properties:
+      OwnerArn: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/AWSJamAdminAccessRole/default      	
+      InstanceType: t3.large
+      SubnetId:
+        Ref: Cloud9VPCPublicSubnet1Subnet83C59F37
+    Metadata:
+      aws:cdk:path: Cloud9Stack/Cloud9Env/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAAE02QzU7DMBCEn6V318VBILhRRRHqBawW9e5sFuE2WVf2OhWy8u7YLTScdmb0eX+sZFLqQd4tXsw5LKE7rsB5lGnHBo6i/iRtvBmQ0RfzHvkUWdSOAvsIXLItBhc94CSUevrfKBWRECqZ9ico6F7XQse2t7CLLeHl+ay2LjJ+mLbHOZ+zdQgOrGHr6AYX0Wx0KW+GXw3j2XwL7e2Y5dx4Q3n9rP+A6ya/bs350q8BiScBvYvds0wNVA2N1jsq+WXKbJu6mjJaful2+iTIdSgPYTWqSqpHeb84BGuXPhLbIYPX+gOhnOvabQEAAA==
+    Metadata:
+      aws:cdk:path: Cloud9Stack/CDKMetadata/Default
+Outputs:
+  URL:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://us-east-1.console.aws.amazon.com/cloud9/ide/
+          - Ref: Cloud9EnvD28F4C4F
+  KeyName:
+    Value: lab-key-pair
+  eksclustername:
+    Value: jamcluster.clusterName
+  deployedpods:
+    Value: "5"
+
